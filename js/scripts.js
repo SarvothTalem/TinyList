@@ -31,9 +31,10 @@ function parseList() {
 function parseArmyList(inputText) {
     console.log("Parsing input...");
 
+    // Filter out empty lines and the "Exported" line
     const lines = inputText
         .split("\n")
-        .filter(line => line.trim() && !line.startsWith("Exported with App Version"));  // Filter out empty lines and the "Exported" line
+        .filter(line => line.trim() && !line.startsWith("Exported with App Version"));
 
     console.log("Filtered lines:", lines);  // Check if the exported line is properly removed
 
@@ -68,7 +69,8 @@ function parseArmyList(inputText) {
         { name: "Allied Units", label: "ALLIED UNITS", is_character: false }
     ];
 
-    const splitSections = inputText.split("\n\n");
+    // We need to recombine sections and split lines AFTER filtering the input
+    const splitSections = lines.join("\n").split("\n\n");  // Re-split based on filtered lines
 
     for (const section of splitSections) {
         if (sections.some(sec => sec.label === section)) {
