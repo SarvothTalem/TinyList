@@ -1,33 +1,31 @@
-// Load the weapon exclusion list from the JSON file dynamically
 let weapon_exclude_list = [];
 
+// Load the weapon exclusion list from the JSON file dynamically
 fetch('js/exclusion_list.json')
   .then(response => response.json())
   .then(data => {
     weapon_exclude_list = data;
-    console.log("Weapon exclusion list loaded:", weapon_exclude_list);  // Check if the list is loaded
+    console.log("Weapon exclusion list loaded:", weapon_exclude_list);
   })
   .catch(error => console.error('Error loading the exclusion list:', error));
 
-// Define the parseList function
 function parseList() {
     alert("Button clicked!");
 
     const input = document.getElementById("input").value;
-    console.log("Input received:", input);  // Check if input is being passed correctly
-    
+    console.log("Input received:", input);
+
     if (!input.trim()) {
         alert("Please enter a valid army list.");
         return;
     }
 
     const output = parseArmyList(input);
-    console.log("Output generated:", output);  // Check if the parsing works
+    console.log("Output generated:", output);
 
-    document.getElementById("output").textContent = output;  // Display the output in the <pre> element
+    document.getElementById("output").textContent = output;
 }
 
-// Define the parseArmyList function
 function parseArmyList(inputText) {
     console.log("Parsing input...");
 
@@ -63,6 +61,7 @@ function parseArmyList(inputText) {
 
     let currentSection = null;
     const splitSections = inputText.split("\n\n");
+
     for (const section of splitSections) {
         if (sections.some(sec => sec.label === section)) {
             currentSection = sections.find(sec => sec.label === section);
@@ -77,7 +76,7 @@ function parseArmyList(inputText) {
 
             const isCharacter = currentSection?.is_character;
             if (isCharacter) {
-                totalModels = 1;
+                totalModels = 1;  // Ensure characters are always 1 model
             }
 
             for (const line of unitLines.slice(1)) {
@@ -86,6 +85,7 @@ function parseArmyList(inputText) {
                 }
 
                 const match = line.match(/(\d+)x/);
+                // Ensure that we are not counting weapon lines as models
                 if (match && !isCharacter && !weapon_exclude_list.some(weapon => line.includes(weapon))) {
                     totalModels += parseInt(match[1]);
                 }
