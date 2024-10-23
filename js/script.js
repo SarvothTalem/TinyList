@@ -8,45 +8,56 @@ function parseList() {
         "Characters": "",
         "Battleline": "",
         "Dedicated Transport": "",
-        "Other": "",
-        "Allies": ""
+        "Other Datasheets": "",
+        "Allied Units": ""
     };
 
-    // Use regex to extract the Army Name and Faction
-    const armyNameMatch = input.match(/Army Name:\s*(.*)/);
-    const factionMatch = input.match(/Faction:\s*(.*)/);
+    // Extract Army Name and Points
+    const armyNameMatch = input.match(/^(.*) \((\d+) points\)/i);
+    if (armyNameMatch) {
+        parsedList["Army Name"] = armyNameMatch[1].trim();
+    }
 
-    if (armyNameMatch) parsedList["Army Name"] = armyNameMatch[1];
-    if (factionMatch) parsedList["Faction"] = factionMatch[1];
+    // Extract Faction
+    const factionMatch = input.match(/^(.+)\n(.+) \((\d+) points\)\n(.+)/i);
+    if (factionMatch) {
+        parsedList["Faction"] = `${factionMatch[1].trim()}, ${factionMatch[2].trim()}`;
+    }
 
-    // Define the sections to parse
-    const sections = ["Characters", "Battleline", "Dedicated Transport", "Other", "Allies"];
+    // Define sections and their labels
+    const sections = [
+        { name: "Characters", label: "CHARACTERS" },
+        { name: "Battleline", label: "BATTLELINE" },
+        { name: "Dedicated Transport", label: "DEDICATED TRANSPORTS" },
+        { name: "Other Datasheets", label: "OTHER DATASHEETS" },
+        { name: "Allied Units", label: "ALLIED UNITS" }
+    ];
 
-    // Loop through each section and extract relevant entries
+    // Loop through each section and extract the corresponding entries
     sections.forEach(section => {
-        const regex = new RegExp(`${section}:([\\s\\S]*?)(?=\\n\\n|\\n${sections.join('|')}:|$)`, 'gi');
+        const regex = new RegExp(`${section.label}:([\\s\\S]*?)(?=\\n\\n|$)`, 'i');
         const sectionMatch = regex.exec(input);
 
         if (sectionMatch && sectionMatch[1]) {
-            // Clean up the section by removing points and equipment using regex
+            // Clean up section: remove points and equipment
             let cleanSection = sectionMatch[1]
-                .replace(/\(\d+ points\)/g, '') // Remove points like "(100 points)"
-                .replace(/,?\s*with.*$/gm, '')  // Remove equipment starting with "with..."
+                .replace(/\(\d+\s*points\)/gi, '') // Remove points
+                .replace(/•\s*\d+x\s*.*/gi, '')    // Remove equipment lines (e.g., "• 1x Chainsword")
                 .trim();
 
-            parsedList[section] = cleanSection;
+            parsedList[section.name] = cleanSection;
         }
     });
 
-    // Format the parsed result into readable output
+    // Format the output
     let output = `Army Name: ${parsedList["Army Name"]}\nFaction: ${parsedList["Faction"]}\n\n`;
 
     sections.forEach(section => {
-        if (parsedList[section].trim()) {
-            output += `${section}:\n${parsedList[section]}\n\n`;
+        if (parsedList[section.name].trim()) {
+            output += `${section.name}:\n${parsedList[section.name]}\n\n`;
         }
     });
 
-    // Display the parsed and cleaned up army list
+    // Display the parsed and cleaned-up army list
     document.getElementById('output').textContent = output.trim();
 }
