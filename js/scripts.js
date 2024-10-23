@@ -4,7 +4,7 @@ let weapon_exclude_list = [];
 fetch('js/exclusion_list.json')
   .then(response => response.json())
   .then(data => {
-    weapon_exclude_list = data;
+    weapon_exclude_list = data.map(item => item.toLowerCase()); // Convert list to lowercase for case-insensitive matching
     console.log("Weapon exclusion list loaded:", weapon_exclude_list);
   })
   .catch(error => console.error('Error loading the exclusion list:', error));
@@ -14,17 +14,17 @@ function parseList() {
     alert("Button clicked!");
 
     const input = document.getElementById("input").value;
-    console.log("Input received:", input);  // Check if input is being passed correctly
-    
+    console.log("Input received:", input);
+
     if (!input.trim()) {
         alert("Please enter a valid army list.");
         return;
     }
 
     const output = parseArmyList(input);
-    console.log("Output generated:", output);  // Check if the parsing works
+    console.log("Output generated:", output);
 
-    document.getElementById("output").textContent = output;  // Display the output in the <pre> element
+    document.getElementById("output").textContent = output;
 }
 
 // Define the parseArmyList function
@@ -90,7 +90,7 @@ function parseArmyList(inputText) {
 
                 const match = line.match(/(\d+)x/);
                 // Ensure that we are not counting weapon lines as models
-                if (match && !isCharacter && !weapon_exclude_list.some(weapon => line.includes(weapon))) {
+                if (match && !isCharacter && !isExcludedWeapon(line)) {
                     totalModels += parseInt(match[1]);
                 }
             }
@@ -104,4 +104,10 @@ function parseArmyList(inputText) {
     console.log("Final output: ", output);
 
     return output.join("\n");
+}
+
+// Helper function to check if a line contains an excluded weapon
+function isExcludedWeapon(line) {
+    const lowerCaseLine = line.toLowerCase();  // Convert line to lowercase for case-insensitive matching
+    return weapon_exclude_list.some(weapon => lowerCaseLine.includes(weapon));  // Check for partial matches
 }
