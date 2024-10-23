@@ -3,8 +3,7 @@ function parseList() {
 
     // Create an object to store the parsed sections
     let parsedList = {
-        "Army Name": "",
-        "Faction": "",
+        "Army Header": "", // This will store the Army Name and faction-related details
         "Characters": "",
         "Battleline": "",
         "Dedicated Transport": "",
@@ -12,16 +11,11 @@ function parseList() {
         "Allied Units": ""
     };
 
-    // Extract Army Name and Points
-    const armyNameMatch = input.match(/^(.*) \((\d+) points\)/i);
-    if (armyNameMatch) {
-        parsedList["Army Name"] = armyNameMatch[1].trim();
-    }
-
-    // Extract Faction: This handles multiple lines for faction
-    const factionMatch = input.match(/(Astra Militarum.*)\n([\s\S]*?)\n\n/i);
-    if (factionMatch) {
-        parsedList["Faction"] = factionMatch[1].trim() + ', ' + factionMatch[2].trim();
+    // Extract Army Header (Line 1 + Lines 3-5)
+    const armyHeaderMatch = input.match(/^(.*)\n\n(.*)\n(.*)\n(.*)/i);
+    if (armyHeaderMatch) {
+        // Combine Lines 3, 4, and 5 for output
+        parsedList["Army Header"] = `${armyHeaderMatch[1].trim()}\n${armyHeaderMatch[2].trim()} - ${armyHeaderMatch[3].trim()} - ${armyHeaderMatch[4].trim()}`;
     }
 
     // Define sections and their labels
@@ -49,8 +43,8 @@ function parseList() {
         }
     });
 
-    // Format the output
-    let output = `Army Name: ${parsedList["Army Name"]}\nFaction: ${parsedList["Faction"]}\n\n`;
+    // Format the output (Army Header + Sections)
+    let output = `${parsedList["Army Header"]}\n\n`;
 
     sections.forEach(section => {
         if (parsedList[section.name].trim()) {
