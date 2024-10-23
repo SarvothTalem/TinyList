@@ -3,27 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Warhammer 40k Army List Parser</title>
-    <link rel="stylesheet" href="css/style.css">
+    <title>Sarvoth's Warhammer 40k Tiny List Maker</title>
+    <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
+    <h1>Sarvoth's Warhammer 40k Tiny List Maker</h1>
+    <p>
+        This parser simplifies Warhammer 40k army lists and requires exports from the official Warhammer 40k app.
+        For any issues or concerns, please contact me at <a href="mailto:sarvoth@gmail.com">sarvoth@gmail.com</a>.
+    </p>
 
-<div class="container">
-    <h1>Warhammer 40k Army List Parser</h1>
-
-    <!-- Textarea for pasting the army list -->
-    <textarea id="armyList" placeholder="Paste your Warhammer 40k army list here..."></textarea>
+    <textarea id="input" rows="10" cols="50" placeholder="Paste your army list here..."></textarea>
+    <br>
     <button onclick="parseList()">Parse List</button>
+    <pre id="output"></pre>
 
-    <!-- Section to display units with input fields for model counts -->
-    <div id="unitsSection"></div>
-
-    <button onclick="generateExport()">Generate Export</button>
-
-    <h2>Exported List:</h2>
-    <div id="exportedList"></div>
-</div>
-
-<script src="js/script.js"></script>
+    <script src="js/scripts.js"></script>
 </body>
 </html>
