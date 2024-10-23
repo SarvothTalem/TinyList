@@ -1,8 +1,11 @@
 function parseList() {
-   // alert("Button clicked!");  // This will verify if the button click is being registered.
+    alert("Button clicked!");  // Already confirmed working
     
     // Get the input text from the textarea
     const input = document.getElementById("input").value;
+
+    // Log the input to verify it's being captured correctly
+    console.log("Input: ", input);
 
     // If input is empty or only spaces, alert the user
     if (!input.trim()) {
@@ -13,6 +16,9 @@ function parseList() {
     // Process the input text using the parseArmyList function
     const output = parseArmyList(input);
     
+    // Log the output to verify it's being generated
+    console.log("Output: ", output);
+
     // Display the parsed output in the <pre> element
     document.getElementById("output").textContent = output;
 }
@@ -28,6 +34,9 @@ function parseArmyList(inputText) {
         { name: "Allied Units", label: "ALLIED UNITS", is_character: false }
     ];
 
+    // Log that we're starting the parsing process
+    console.log("Parsing input...");
+
     // Split the input into lines and remove blank lines
     const lines = inputText.split("\n").filter(line => line.trim());
     let armyName = lines[0].trim();
@@ -35,7 +44,7 @@ function parseArmyList(inputText) {
     
     // Extract points from the army name
     if (armyName.includes("(") && armyName.includes(")")) {
-        pointsInfo = armyName.slice(armyName.indexOf("("), armyName.indexOf(")") + 1);
+        pointsInfo = armyName.slice(armyName.indexOf("("), armyName.index(")") + 1);
         armyName = armyName.slice(0, armyName.index("(")).trim();
     }
 
@@ -45,6 +54,9 @@ function parseArmyList(inputText) {
     // Add army name and faction info to output
     output.push(`${armyName} ${pointsInfo}`);
     output.push(factionInfo);
+
+    // Log the initial output (army name and faction info)
+    console.log("Initial output: ", output);
 
     let currentSection = null;
     
@@ -79,6 +91,9 @@ function parseArmyList(inputText) {
             output.push(totalModels > 0 ? `${finalUnitName} x${totalModels}` : finalUnitName);
         }
     }
+
+    // Log the final output before returning
+    console.log("Final output: ", output);
 
     return output.join("\n");
 }
