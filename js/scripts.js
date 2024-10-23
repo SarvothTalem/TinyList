@@ -1,31 +1,3 @@
-let weapon_exclude_list = [];
-
-// Load the weapon exclusion list from the JSON file dynamically
-fetch('js/exclusion_list.json')
-  .then(response => response.json())
-  .then(data => {
-    weapon_exclude_list = data;
-    console.log("Weapon exclusion list loaded:", weapon_exclude_list);  // Check if the list is loaded
-  })
-  .catch(error => console.error('Error loading the exclusion list:', error));
-
-function parseList() {
-    alert("Button clicked!");
-
-    const input = document.getElementById("input").value;
-    console.log("Input received:", input);  // Check if input is being passed correctly
-    
-    if (!input.trim()) {
-        alert("Please enter a valid army list.");
-        return;
-    }
-
-    const output = parseArmyList(input);
-    console.log("Output generated:", output);  // Check if the parsing works
-
-    document.getElementById("output").textContent = output;  // Display the output in the <pre> element
-}
-
 function parseArmyList(inputText) {
     console.log("Parsing input...");
 
@@ -38,25 +10,22 @@ function parseArmyList(inputText) {
         { name: "Allied Units", label: "ALLIED UNITS", is_character: false }
     ];
 
-    // Split the input into lines and remove blank lines
     const lines = inputText.split("\n").filter(line => line.trim());
-    
-    // Ensure that lines[0] exists and is a string before assigning it to armyName
     if (!lines[0] || typeof lines[0] !== "string") {
         console.error("Invalid army name. Check the input format.");
         return "Error: Invalid army name. Please check the input format.";
     }
-    
+
     let armyName = lines[0].trim();
     let pointsInfo = "";
-    
+
     // Extract points from the army name
     if (armyName.includes("(") && armyName.includes(")")) {
         pointsInfo = armyName.slice(armyName.indexOf("("), armyName.indexOf(")") + 1);
         armyName = armyName.slice(0, armyName.indexOf("(")).trim();
     }
 
-    // Get the faction information (only if lines[1], lines[2], and lines[4] exist)
+    // Get faction info
     const factionInfo = `${lines[1]?.trim() || ""} - ${lines[2]?.trim() || ""} - ${lines[4]?.trim() || ""}`;
 
     // Add army name and faction info to output
@@ -66,7 +35,7 @@ function parseArmyList(inputText) {
     console.log("Initial output: ", output);
 
     let currentSection = null;
-    
+
     // Process sections of the input
     const splitSections = inputText.split("\n\n");
     for (const section of splitSections) {
@@ -81,14 +50,21 @@ function parseArmyList(inputText) {
             let enhancement = "";
             let totalModels = 0;
 
+            // Characters should always be 1 model
+            const isCharacter = currentSection?.is_character;
+            if (isCharacter) {
+                totalModels = 1;
+            }
+
             // Parse each unit's line
             for (const line of unitLines.slice(1)) {
                 if (line.includes("Enhancement:")) {
                     enhancement = line.split("Enhancement:")[1].trim();
                 }
 
+                // Count only model lines, skip weapon lines
                 const match = line.match(/(\d+)x/);
-                if (match && !weapon_exclude_list.some(weapon => line.includes(weapon))) {
+                if (match && !isCharacter && !weapon_exclude_list.some(weapon => line.includes(weapon))) {
                     totalModels += parseInt(match[1]);
                 }
             }
