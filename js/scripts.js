@@ -40,7 +40,10 @@ function parseArmyList(inputText) {
         { name: "Allied Units", label: "ALLIED UNITS", is_character: false }
     ];
 
-    const lines = inputText.split("\n").filter(line => line.trim());
+    const lines = inputText
+        .split("\n")
+        .filter(line => line.trim() && !line.startsWith("Exported with App Version"));  // Filter out empty lines and the "Exported" line
+
     if (!lines[0] || typeof lines[0] !== "string") {
         console.error("Invalid army name. Check the input format.");
         return "Error: Invalid army name. Please check the input format.";
@@ -54,8 +57,10 @@ function parseArmyList(inputText) {
         armyName = armyName.slice(0, armyName.indexOf("(")).trim();
     }
 
+    // Combine the relevant faction information (lines 1, 2, and 4) without repeating headers
     const factionInfo = `${lines[1]?.trim() || ""} - ${lines[2]?.trim() || ""} - ${lines[4]?.trim() || ""}`;
-
+    
+    // Push army name with points and faction info (without repeated info)
     output.push(`${armyName} ${pointsInfo}`);
     output.push(factionInfo);
 
