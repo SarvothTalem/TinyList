@@ -93,8 +93,13 @@ function parseArmyList(inputText) {
                 totalModels = 1;
             }
 
-            // Parse each unit's line
+            // Parse each unit's line, excluding weapon lines
             for (const unitLine of unitLines.slice(1)) {
+                if (isExcludedWeapon(unitLine)) {
+                    console.log("Excluding weapon line:", unitLine);  // Skip weapon lines
+                    continue;
+                }
+
                 console.log("Processing line: ", unitLine);  // Log each line being processed
 
                 if (unitLine.includes("Enhancement:")) {
@@ -102,9 +107,8 @@ function parseArmyList(inputText) {
                 }
 
                 const match = unitLine.match(/(\d+)x/);
-                if (match && !isExcludedWeapon(unitLine)) {
+                if (match) {
                     console.log("Matched a model line:", unitLine);
-                    console.log("Is this line excluded?", isExcludedWeapon(unitLine));
                     if (!isCharacter) {
                         totalModels += parseInt(match[1]);
                     }
@@ -135,9 +139,5 @@ function isExcludedWeapon(line) {
         return regex.test(lowerCaseLine);  // Test for full word match
     });
 
-    if (isExcluded) {
-        console.log("Excluding weapon line:", line);
-    }
-    
     return isExcluded;
 }
