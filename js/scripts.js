@@ -1,31 +1,3 @@
-let weapon_exclude_list = [];
-
-// Load the weapon exclusion list from the JSON file dynamically
-fetch('js/exclusion_list.json')
-  .then(response => response.json())
-  .then(data => {
-    weapon_exclude_list = data;
-    console.log("Weapon exclusion list loaded:", weapon_exclude_list);
-  })
-  .catch(error => console.error('Error loading the exclusion list:', error));
-
-function parseList() {
-    alert("Button clicked!");
-
-    const input = document.getElementById("input").value;
-    console.log("Input received:", input);
-
-    if (!input.trim()) {
-        alert("Please enter a valid army list.");
-        return;
-    }
-
-    const output = parseArmyList(input);
-    console.log("Output generated:", output);
-
-    document.getElementById("output").textContent = output;
-}
-
 function parseArmyList(inputText) {
     console.log("Parsing input...");
 
@@ -45,21 +17,10 @@ function parseArmyList(inputText) {
     }
 
     let armyName = lines[0].trim();
-    let pointsInfo = "";
-
-    if (armyName.includes("(") && armyName.includes(")")) {
-        pointsInfo = armyName.slice(armyName.indexOf("("), armyName.indexOf(")") + 1);
-        armyName = armyName.slice(0, armyName.indexOf("(")).trim();
-    }
-
-    const factionInfo = `${lines[1]?.trim() || ""} - ${lines[2]?.trim() || ""} - ${lines[4]?.trim() || ""}`;
-
-    output.push(`${armyName} ${pointsInfo}`);
-    output.push(factionInfo);
-
-    console.log("Initial output: ", output);
+    output.push(`${armyName}`);
 
     let currentSection = null;
+
     const splitSections = inputText.split("\n\n");
 
     for (const section of splitSections) {
@@ -71,7 +32,6 @@ function parseArmyList(inputText) {
         const unitLines = section.split("\n").filter(line => line.trim());
         if (unitLines.length) {
             const unitName = unitLines[0].split(" (")[0].trim();
-            let enhancement = "";
             let totalModels = 0;
 
             const isCharacter = currentSection?.is_character;
@@ -80,23 +40,10 @@ function parseArmyList(inputText) {
             }
 
             for (const line of unitLines.slice(1)) {
-                if (line.includes("Enhancement:")) {
-                    enhancement = line.split("Enhancement:")[1].trim();
-                }
-
                 const match = line.match(/(\d+)x/);
-                // Ensure that we are not counting weapon lines as models
-                if (match && !isCharacter && !weapon_exclude_list.some(weapon => line.includes(weapon))) {
+                if (match && !isCharacter) {
                     totalModels += parseInt(match[1]);
                 }
             }
 
-            const finalUnitName = enhancement ? `${unitName} w/ ${enhancement}` : unitName;
-            output.push(totalModels > 0 ? `${finalUnitName} x${totalModels}` : finalUnitName);
-        }
-    }
-
-    console.log("Final output: ", output);
-
-    return output.join("\n");
-}
+            output.push(`${unitName
