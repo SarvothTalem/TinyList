@@ -31,12 +31,10 @@ function parseList() {
 function parseArmyList(inputText) {
     console.log("Parsing input...");
 
-    // Filter out empty lines and the "Exported with App Version" line
-    const lines = inputText
-        .split("\n")
-        .filter(line => line.trim() && !line.startsWith("Exported with App Version"));
+    // Split the lines without filtering out any metadata or version info
+    const lines = inputText.split("\n").filter(line => line.trim());
 
-    console.log("Filtered lines:", lines);  // Check if the exported line is properly removed
+    console.log("Filtered lines:", lines);  // Check the lines
 
     if (!lines[0] || typeof lines[0] !== "string") {
         console.error("Invalid army name. Check the input format.");
@@ -51,7 +49,7 @@ function parseArmyList(inputText) {
         armyName = armyName.slice(0, armyName.indexOf("(")).trim();
     }
 
-    // Combine the relevant faction information (lines 1, 2, and 4) without repeating headers
+    // Combine the relevant faction information (lines 1, 2, and 4) without filtering any other headers
     const factionInfo = `${lines[1]?.trim() || ""} - ${lines[2]?.trim() || ""} - ${lines[4]?.trim() || ""}`;
     
     const output = [];
@@ -93,7 +91,7 @@ function parseArmyList(inputText) {
                 totalModels = 1;
             }
 
-            // Parse each unit's line, strictly excluding weapon lines
+            // Parse each unit's line, excluding weapon lines
             for (const unitLine of unitLines.slice(1)) {
                 if (isExcludedWeapon(unitLine)) {
                     console.log("Skipping excluded weapon line:", unitLine);  // Skip weapon lines
