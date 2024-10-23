@@ -31,18 +31,11 @@ function parseList() {
 function parseArmyList(inputText) {
     console.log("Parsing input...");
 
-    const output = [];
-    const sections = [
-        { name: "Characters", label: "CHARACTERS", is_character: true },
-        { name: "Battleline", label: "BATTLELINE", is_character: false },
-        { name: "Dedicated Transports", label: "DEDICATED TRANSPORTS", is_character: false },
-        { name: "Other Datasheets", label: "OTHER DATASHEETS", is_character: false },
-        { name: "Allied Units", label: "ALLIED UNITS", is_character: false }
-    ];
-
     const lines = inputText
         .split("\n")
         .filter(line => line.trim() && !line.startsWith("Exported with App Version"));  // Filter out empty lines and the "Exported" line
+
+    console.log("Filtered lines:", lines);  // Check if the exported line is properly removed
 
     if (!lines[0] || typeof lines[0] !== "string") {
         console.error("Invalid army name. Check the input format.");
@@ -60,13 +53,21 @@ function parseArmyList(inputText) {
     // Combine the relevant faction information (lines 1, 2, and 4) without repeating headers
     const factionInfo = `${lines[1]?.trim() || ""} - ${lines[2]?.trim() || ""} - ${lines[4]?.trim() || ""}`;
     
-    // Push army name with points and faction info (without repeated info)
+    const output = [];
     output.push(`${armyName} ${pointsInfo}`);
     output.push(factionInfo);
 
-    console.log("Initial output: ", output);
+    console.log("Initial output:", output);
 
     let currentSection = null;
+    const sections = [
+        { name: "Characters", label: "CHARACTERS", is_character: true },
+        { name: "Battleline", label: "BATTLELINE", is_character: false },
+        { name: "Dedicated Transports", label: "DEDICATED TRANSPORTS", is_character: false },
+        { name: "Other Datasheets", label: "OTHER DATASHEETS", is_character: false },
+        { name: "Allied Units", label: "ALLIED UNITS", is_character: false }
+    ];
+
     const splitSections = inputText.split("\n\n");
 
     for (const section of splitSections) {
