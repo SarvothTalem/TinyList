@@ -69,7 +69,6 @@ function parseArmyList(inputText) {
         { name: "Allied Units", label: "ALLIED UNITS", is_character: false }
     ];
 
-    // Start processing line by line instead of splitting further
     let processingSection = false;
     for (const line of lines) {
         // Check if the line is a section header
@@ -103,11 +102,10 @@ function parseArmyList(inputText) {
                 }
 
                 const match = unitLine.match(/(\d+)x/);
-                if (match) {
+                if (match && !isExcludedWeapon(unitLine)) {
                     console.log("Matched a model line:", unitLine);
-                    const isExcluded = isExcludedWeapon(unitLine);  // Call the function and check for exclusions
-                    console.log("Is this line excluded?", isExcluded);
-                    if (!isCharacter && !isExcluded) {
+                    console.log("Is this line excluded?", isExcludedWeapon(unitLine));
+                    if (!isCharacter) {
                         totalModels += parseInt(match[1]);
                     }
                 }
@@ -131,9 +129,15 @@ function parseArmyList(inputText) {
 // Helper function to check if a line contains an excluded weapon
 function isExcludedWeapon(line) {
     const lowerCaseLine = line.toLowerCase();  // Convert line to lowercase for case-insensitive matching
-    return weapon_exclude_list.some(weapon => {
+    const isExcluded = weapon_exclude_list.some(weapon => {
         const lowerCaseWeapon = weapon.toLowerCase();
         const regex = new RegExp(`\\b${lowerCaseWeapon}\\b`);  // Use word boundary to ensure full word match
         return regex.test(lowerCaseLine);  // Test for full word match
     });
+
+    if (isExcluded) {
+        console.log("Excluding weapon line:", line);
+    }
+    
+    return isExcluded;
 }
