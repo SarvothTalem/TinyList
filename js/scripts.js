@@ -1,33 +1,3 @@
-let weapon_exclude_list = [];
-
-// Load the weapon exclusion list from the JSON file dynamically
-fetch('js/exclusion_list.json')
-  .then(response => response.json())
-  .then(data => {
-    weapon_exclude_list = data.map(item => item.toLowerCase()); // Convert list to lowercase for case-insensitive matching
-    console.log("Weapon exclusion list loaded:", weapon_exclude_list);
-  })
-  .catch(error => console.error('Error loading the exclusion list:', error));
-
-// Define the parseList function
-function parseList() {
-    alert("Button clicked!");
-
-    const input = document.getElementById("input").value;
-    console.log("Input received:", input);
-
-    if (!input.trim()) {
-        alert("Please enter a valid army list.");
-        return;
-    }
-
-    const output = parseArmyList(input);
-    console.log("Output generated:", output);
-
-    document.getElementById("output").textContent = output;
-}
-
-// Define the parseArmyList function
 function parseArmyList(inputText) {
     console.log("Parsing input...");
 
@@ -84,18 +54,23 @@ function parseArmyList(inputText) {
 
             // Parse each unit's line
             for (const line of unitLines.slice(1)) {
+                console.log("Processing line: ", line);  // Log each line being processed
+
                 if (line.includes("Enhancement:")) {
                     enhancement = line.split("Enhancement:")[1].trim();
                 }
 
                 const match = line.match(/(\d+)x/);
-                // Ensure that we are not counting weapon lines as models
-                if (match && !isCharacter && !isExcludedWeapon(line)) {
-                    totalModels += parseInt(match[1]);
+                if (match) {
+                    console.log("Matched a model line:", line);
+                    const isExcluded = isExcludedWeapon(line);  // Call the function and check for exclusions
+                    console.log("Is this line excluded?", isExcluded);
+                    if (!isCharacter && !isExcluded) {
+                        totalModels += parseInt(match[1]);
+                    }
                 }
             }
 
-            // Combine unit name with enhancement and model count
             const finalUnitName = enhancement ? `${unitName} w/ ${enhancement}` : unitName;
             output.push(totalModels > 0 ? `${finalUnitName} x${totalModels}` : finalUnitName);
         }
@@ -106,7 +81,6 @@ function parseArmyList(inputText) {
     return output.join("\n");
 }
 
-// Helper function to check if a line contains an excluded weapon
 function isExcludedWeapon(line) {
     const lowerCaseLine = line.toLowerCase();  // Convert line to lowercase for case-insensitive matching
     const isExcluded = weapon_exclude_list.some(weapon => lowerCaseLine.includes(weapon));  // Check for partial matches
@@ -116,3 +90,4 @@ function isExcludedWeapon(line) {
     }
 
     return isExcluded;
+}
