@@ -3,8 +3,8 @@ function parseList() {
     const unitsSection = document.getElementById('unitsSection');
     unitsSection.innerHTML = ''; // Clear any previous output
 
-    // Regex to match unit headers and display them
-    const unitRegex = /(?:\n\n)([A-Za-z\s]+)\n/g;
+    // Regex to match unit lines and ignore section headers
+    const unitRegex = /(?:^\s*)([A-Za-z\s]+)\(\d+ points\)/gm;
     let match;
     while (match = unitRegex.exec(input)) {
         const unitName = match[1].trim();
@@ -29,7 +29,8 @@ function generateExport() {
     const exportedList = document.getElementById('exportedList');
     exportedList.innerHTML = ''; // Clear any previous output
 
-    const unitRegex = /(?:\n\n)([A-Za-z\s]+)\n/g;
+    // Regex to match unit lines and ignore section headers
+    const unitRegex = /(?:^\s*)([A-Za-z\s]+)\(\d+ points\)/gm;
     let match;
     let exportContent = '';
 
@@ -43,3 +44,4 @@ function generateExport() {
 
     exportedList.innerText = exportContent.trim();
 }
+
