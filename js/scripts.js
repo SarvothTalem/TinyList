@@ -128,7 +128,7 @@ function isExcludedWeapon(line) {
     });
 }
 
-// Post-process the final output to remove the last line, any repeated headers, and duplicate army names/factions
+// Post-process the final output to remove the last line, any repeated headers, duplicate army names/factions, and lines 3 and 4
 function postProcessOutput(output) {
     const outputLines = output.split("\n").filter(line => line.trim());
     
@@ -149,6 +149,11 @@ function postProcessOutput(output) {
             return false;  // Skip duplicates of the army name and faction
         }
         return true;
+    });
+
+    // Remove lines 3 and 4 (index 2 and 3)
+    filteredLines = filteredLines.filter((line, index) => {
+        return index !== 2 && index !== 3;
     });
 
     return filteredLines.join("\n");
