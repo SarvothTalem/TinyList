@@ -5,7 +5,7 @@ fetch('js/exclusion_list.json')
   .then(response => response.json())
   .then(data => {
     weapon_exclude_list = data.map(item => item.toLowerCase());  // Convert list to lowercase for case-insensitive matching
-    console.log("Weapon exclusion list loaded:", weapon_exclude_list);  // Ensure it's loaded properly
+    console.log("Weapon exclusion list loaded:", weapon_exclude_list);
   })
   .catch(error => console.error('Error loading the exclusion list:', error));
 
@@ -76,7 +76,7 @@ function parseArmyList(inputText) {
             let enhancement = "";
             let totalModels = 0;
 
-            // For characters, always set totalModels to 1
+            // For characters, don't show model count
             const isCharacter = currentSection?.is_character;
             if (isCharacter) {
                 totalModels = 1;
@@ -101,8 +101,13 @@ function parseArmyList(inputText) {
                 }
             }
 
+            // Only display model count for non-characters
             const finalUnitName = enhancement ? `${unitName} w/ ${enhancement}` : unitName;
-            output.push(totalModels > 0 ? `${finalUnitName} x${totalModels}` : finalUnitName);
+            if (isCharacter) {
+                output.push(finalUnitName);  // For characters, do not show model count
+            } else {
+                output.push(totalModels > 0 ? `${finalUnitName} x${totalModels}` : finalUnitName);
+            }
         }
     }
 
@@ -114,11 +119,9 @@ function parseArmyList(inputText) {
 // Helper function to check if a line contains an excluded weapon
 function isExcludedWeapon(line) {
     const lowerCaseLine = line.toLowerCase();  // Convert line to lowercase for case-insensitive matching
-    const isExcluded = weapon_exclude_list.some(weapon => lowerCaseLine.includes(weapon));  // Check for partial matches
-    
-    if (!isExcluded) {
-        console.log("Not excluded:", line);  // Log the lines that are not being excluded
-    }
-
-    return isExcluded;
+    return weapon_exclude_list.some(weapon => {
+        const lowerCaseWeapon = weapon.toLowerCase();
+        const regex = new RegExp(`\\b${lowerCaseWeapon}\\b`);  // Use word boundary to ensure full word match
+        return regex.test(lowerCaseLine);  // Test for full word match
+    });
 }
