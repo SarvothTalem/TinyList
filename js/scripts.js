@@ -93,7 +93,7 @@ function parseArmyList(inputText) {
                 totalModels = 1;
             }
 
-            // Parse each unit's line, excluding weapon lines
+            // Parse each unit's line, strictly excluding weapon lines
             for (const unitLine of unitLines.slice(1)) {
                 if (isExcludedWeapon(unitLine)) {
                     console.log("Skipping excluded weapon line:", unitLine);  // Skip weapon lines
