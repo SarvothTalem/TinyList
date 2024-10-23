@@ -1,57 +1,45 @@
 function parseList() {
-    let input = document.getElementById('armyList').value;
+    const input = document.getElementById('armyList').value;
+    const unitsSection = document.getElementById('unitsSection');
+    unitsSection.innerHTML = ''; // Clear any previous output
 
-    // Create an object to store the parsed sections
-    let parsedList = {
-        "Army Header": "", // This will store the Army Name and faction-related details
-        "Characters": "",
-        "Battleline": "",
-        "Dedicated Transport": "",
-        "Other Datasheets": "",
-        "Allied Units": ""
-    };
+    // Regex to match unit headers and display them
+    const unitRegex = /(?:\n\n)([A-Za-z\s]+)\n/g;
+    let match;
+    while (match = unitRegex.exec(input)) {
+        const unitName = match[1].trim();
 
-    // Extract Army Header (Line 1 + Lines 3-5)
-    const armyHeaderMatch = input.match(/^(.*)\n\n(.*)\n(.*)\n(.*)/i);
-    if (armyHeaderMatch) {
-        // Combine Lines 3, 4, and 5 for output
-        parsedList["Army Header"] = `${armyHeaderMatch[1].trim()}\n${armyHeaderMatch[2].trim()} - ${armyHeaderMatch[3].trim()} - ${armyHeaderMatch[4].trim()}`;
+        // Create a new div to display the unit name and model count input
+        const unitDiv = document.createElement('div');
+        const unitLabel = document.createElement('label');
+        const unitInput = document.createElement('input');
+        unitLabel.innerText = `${unitName}: `;
+        unitInput.type = 'number';
+        unitInput.placeholder = 'Enter model count';
+        unitInput.id = `modelCount_${unitName.replace(/\s+/g, '_')}`;  // Unique ID for the input
+
+        unitDiv.appendChild(unitLabel);
+        unitDiv.appendChild(unitInput);
+        unitsSection.appendChild(unitDiv);
+    }
+}
+
+function generateExport() {
+    const input = document.getElementById('armyList').value;
+    const exportedList = document.getElementById('exportedList');
+    exportedList.innerHTML = ''; // Clear any previous output
+
+    const unitRegex = /(?:\n\n)([A-Za-z\s]+)\n/g;
+    let match;
+    let exportContent = '';
+
+    while (match = unitRegex.exec(input)) {
+        const unitName = match[1].trim();
+        const unitId = `modelCount_${unitName.replace(/\s+/g, '_')}`;
+        const modelCount = document.getElementById(unitId).value || 1;  // Default to 1 if no input
+
+        exportContent += `${unitName} x${modelCount}\n`;
     }
 
-    // Define sections and their labels
-    const sections = [
-        { name: "Characters", label: "CHARACTERS" },
-        { name: "Battleline", label: "BATTLELINE" },
-        { name: "Dedicated Transport", label: "DEDICATED TRANSPORTS" },
-        { name: "Other Datasheets", label: "OTHER DATASHEETS" },
-        { name: "Allied Units", label: "ALLIED UNITS" }
-    ];
-
-    // Loop through each section and extract the corresponding entries
-    sections.forEach(section => {
-        const regex = new RegExp(`${section.label}([\\s\\S]*?)(?=\\n\\n|$)`, 'i');
-        const sectionMatch = regex.exec(input);
-
-        if (sectionMatch && sectionMatch[1]) {
-            // Clean up section: remove points and equipment
-            let cleanSection = sectionMatch[1]
-                .replace(/\(\d+\s*points\)/gi, '') // Remove points
-                .replace(/•\s*\d+x\s*.*/gi, '')    // Remove equipment lines (e.g., "• 1x Chainsword")
-                .trim();
-
-            parsedList[section.name] = cleanSection;
-        }
-    });
-
-    // Format the output (Army Header + Sections)
-    let output = `${parsedList["Army Header"]}\n\n`;
-
-    sections.forEach(section => {
-        if (parsedList[section.name].trim()) {
-            output += `${section.name}:\n${parsedList[section.name]}\n\n`;
-        }
-    });
-
-    // Display the parsed and cleaned-up army list
-    document.getElementById('output').textContent = output.trim();
+    exportedList.innerText = exportContent.trim();
 }

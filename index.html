@@ -10,15 +10,20 @@
 
 <div class="container">
     <h1>Warhammer 40k Army List Parser</h1>
-    <p>Paste your army list below:</p>
-    <textarea id="armyList" placeholder="Paste your Warhammer 40k army list here..."></textarea>
-    <button onclick="parseList()">Simplify List</button>
 
-    <h2>Parsed List:</h2>
-    <div id="output"></div>
+    <!-- Textarea for pasting the army list -->
+    <textarea id="armyList" placeholder="Paste your Warhammer 40k army list here..."></textarea>
+    <button onclick="parseList()">Parse List</button>
+
+    <!-- Section to display units with input fields for model counts -->
+    <div id="unitsSection"></div>
+
+    <button onclick="generateExport()">Generate Export</button>
+
+    <h2>Exported List:</h2>
+    <div id="exportedList"></div>
 </div>
 
 <script src="js/script.js"></script>
-
 </body>
 </html>
