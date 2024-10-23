@@ -40,17 +40,24 @@ function parseArmyList(inputText) {
 
     // Split the input into lines and remove blank lines
     const lines = inputText.split("\n").filter(line => line.trim());
+    
+    // Ensure that lines[0] exists and is a string before assigning it to armyName
+    if (!lines[0] || typeof lines[0] !== "string") {
+        console.error("Invalid army name. Check the input format.");
+        return "Error: Invalid army name. Please check the input format.";
+    }
+    
     let armyName = lines[0].trim();
     let pointsInfo = "";
     
     // Extract points from the army name
     if (armyName.includes("(") && armyName.includes(")")) {
-        pointsInfo = armyName.slice(armyName.indexOf("("), armyName.index(")") + 1);
-        armyName = armyName.slice(0, armyName.index("(")).trim();
+        pointsInfo = armyName.slice(armyName.indexOf("("), armyName.indexOf(")") + 1);
+        armyName = armyName.slice(0, armyName.indexOf("(")).trim();
     }
 
-    // Get the faction information
-    const factionInfo = `${lines[1].trim()} - ${lines[2].trim()} - ${lines[4].trim()}`;
+    // Get the faction information (only if lines[1], lines[2], and lines[4] exist)
+    const factionInfo = `${lines[1]?.trim() || ""} - ${lines[2]?.trim() || ""} - ${lines[4]?.trim() || ""}`;
 
     // Add army name and faction info to output
     output.push(`${armyName} ${pointsInfo}`);
