@@ -1,5 +1,5 @@
 function parseList() {
-    alert("Button clicked!");  // This will verify if the button click is being registered.
+   // alert("Button clicked!");  // This will verify if the button click is being registered.
     
     // Get the input text from the textarea
     const input = document.getElementById("input").value;
