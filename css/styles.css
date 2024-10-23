@@ -16,7 +16,7 @@ pre {
     background-color: #f4f4f4;
     padding: 10px;
     border: 1px solid #ccc;
-    white-space: pre-wrap;
+    white-space: pre-wrap;  /* Ensures long text wraps */
     word-wrap: break-word;
 }
 
