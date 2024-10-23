@@ -18,10 +18,10 @@ function parseList() {
         parsedList["Army Name"] = armyNameMatch[1].trim();
     }
 
-    // Extract Faction
-    const factionMatch = input.match(/^(.+)\n(.+) \((\d+) points\)\n(.+)/i);
+    // Extract Faction: This handles multiple lines for faction
+    const factionMatch = input.match(/(Astra Militarum.*)\n([\s\S]*?)\n\n/i);
     if (factionMatch) {
-        parsedList["Faction"] = `${factionMatch[1].trim()}, ${factionMatch[2].trim()}`;
+        parsedList["Faction"] = factionMatch[1].trim() + ', ' + factionMatch[2].trim();
     }
 
     // Define sections and their labels
@@ -35,7 +35,7 @@ function parseList() {
 
     // Loop through each section and extract the corresponding entries
     sections.forEach(section => {
-        const regex = new RegExp(`${section.label}:([\\s\\S]*?)(?=\\n\\n|$)`, 'i');
+        const regex = new RegExp(`${section.label}([\\s\\S]*?)(?=\\n\\n|$)`, 'i');
         const sectionMatch = regex.exec(input);
 
         if (sectionMatch && sectionMatch[1]) {
