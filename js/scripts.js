@@ -109,5 +109,10 @@ function parseArmyList(inputText) {
 // Helper function to check if a line contains an excluded weapon
 function isExcludedWeapon(line) {
     const lowerCaseLine = line.toLowerCase();  // Convert line to lowercase for case-insensitive matching
-    return weapon_exclude_list.some(weapon => lowerCaseLine.includes(weapon));  // Check for partial matches
-}
+    const isExcluded = weapon_exclude_list.some(weapon => lowerCaseLine.includes(weapon));  // Check for partial matches
+    
+    if (!isExcluded) {
+        console.log("Not excluded:", line);  // Log the lines that are not being excluded
+    }
+
+    return isExcluded;
