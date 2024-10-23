@@ -31,11 +31,16 @@ function parseList() {
 function parseArmyList(inputText) {
     console.log("Parsing input...");
 
-    // Split the lines without filtering out any metadata or version info
+    const output = [];
+    const sections = [
+        { name: "Characters", label: "CHARACTERS", is_character: true },
+        { name: "Battleline", label: "BATTLELINE", is_character: false },
+        { name: "Dedicated Transports", label: "DEDICATED TRANSPORTS", is_character: false },
+        { name: "Other Datasheets", label: "OTHER DATASHEETS", is_character: false },
+        { name: "Allied Units", label: "ALLIED UNITS", is_character: false }
+    ];
+
     const lines = inputText.split("\n").filter(line => line.trim());
-
-    console.log("Filtered lines:", lines);  // Check the lines
-
     if (!lines[0] || typeof lines[0] !== "string") {
         console.error("Invalid army name. Check the input format.");
         return "Error: Invalid army name. Please check the input format.";
@@ -49,65 +54,48 @@ function parseArmyList(inputText) {
         armyName = armyName.slice(0, armyName.indexOf("(")).trim();
     }
 
-    // Combine the relevant faction information (lines 1, 2, and 4) without filtering any other headers
     const factionInfo = `${lines[1]?.trim() || ""} - ${lines[2]?.trim() || ""} - ${lines[4]?.trim() || ""}`;
-    
-    const output = [];
+
     output.push(`${armyName} ${pointsInfo}`);
     output.push(factionInfo);
 
-    console.log("Initial output:", output);
+    console.log("Initial output: ", output);
 
     let currentSection = null;
-    const sections = [
-        { name: "Characters", label: "CHARACTERS", is_character: true },
-        { name: "Battleline", label: "BATTLELINE", is_character: false },
-        { name: "Dedicated Transports", label: "DEDICATED TRANSPORTS", is_character: false },
-        { name: "Other Datasheets", label: "OTHER DATASHEETS", is_character: false },
-        { name: "Allied Units", label: "ALLIED UNITS", is_character: false }
-    ];
+    const splitSections = inputText.split("\n\n");
 
-    let processingSection = false;
-    for (const line of lines) {
-        // Check if the line is a section header
-        const sectionHeader = sections.find(sec => sec.label === line.trim());
-        if (sectionHeader) {
-            currentSection = sectionHeader;
-            processingSection = true;
+    for (const section of splitSections) {
+        if (sections.some(sec => sec.label === section)) {
+            currentSection = sections.find(sec => sec.label === section);
             continue;
         }
 
-        if (!processingSection || !currentSection) continue;  // Skip lines before a section starts
-
-        const unitLines = line.split("\n").filter(l => l.trim());
+        const unitLines = section.split("\n").filter(line => line.trim());
         if (unitLines.length) {
             const unitName = unitLines[0].split(" (")[0].trim();
             let enhancement = "";
             let totalModels = 0;
 
             // For characters, don't show model count
-            const isCharacter = currentSection.is_character;
+            const isCharacter = currentSection?.is_character;
             if (isCharacter) {
                 totalModels = 1;
             }
 
-            // Parse each unit's line, excluding weapon lines
-            for (const unitLine of unitLines.slice(1)) {
-                if (isExcludedWeapon(unitLine)) {
-                    console.log("Skipping excluded weapon line:", unitLine);  // Skip weapon lines
-                    continue;
+            // Parse each unit's line
+            for (const line of unitLines.slice(1)) {
+                console.log("Processing line: ", line);  // Log each line being processed
+
+                if (line.includes("Enhancement:")) {
+                    enhancement = line.split("Enhancement:")[1].trim();
                 }
 
-                console.log("Processing line: ", unitLine);  // Log each line being processed
-
-                if (unitLine.includes("Enhancement:")) {
-                    enhancement = unitLine.split("Enhancement:")[1].trim();
-                }
-
-                const match = unitLine.match(/(\d+)x/);
+                const match = line.match(/(\d+)x/);
                 if (match) {
-                    console.log("Matched a model line:", unitLine);
-                    if (!isCharacter) {
+                    console.log("Matched a model line:", line);
+                    const isExcluded = isExcludedWeapon(line);  // Call the function and check for exclusions
+                    console.log("Is this line excluded?", isExcluded);
+                    if (!isCharacter && !isExcluded) {
                         totalModels += parseInt(match[1]);
                     }
                 }
@@ -131,11 +119,9 @@ function parseArmyList(inputText) {
 // Helper function to check if a line contains an excluded weapon
 function isExcludedWeapon(line) {
     const lowerCaseLine = line.toLowerCase();  // Convert line to lowercase for case-insensitive matching
-    const isExcluded = weapon_exclude_list.some(weapon => {
+    return weapon_exclude_list.some(weapon => {
         const lowerCaseWeapon = weapon.toLowerCase();
         const regex = new RegExp(`\\b${lowerCaseWeapon}\\b`);  // Use word boundary to ensure full word match
         return regex.test(lowerCaseLine);  // Test for full word match
     });
-
-    return isExcluded;
 }
