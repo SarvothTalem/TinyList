@@ -31,7 +31,7 @@ function parseList() {
 function parseArmyList(inputText) {
     console.log("Parsing input...");
 
-    // Filter out empty lines and the "Exported" line
+    // Filter out empty lines and the "Exported with App Version" line
     const lines = inputText
         .split("\n")
         .filter(line => line.trim() && !line.startsWith("Exported with App Version"));
@@ -69,39 +69,43 @@ function parseArmyList(inputText) {
         { name: "Allied Units", label: "ALLIED UNITS", is_character: false }
     ];
 
-    // We need to recombine sections and split lines AFTER filtering the input
-    const splitSections = lines.join("\n").split("\n\n");  // Re-split based on filtered lines
-
-    for (const section of splitSections) {
-        if (sections.some(sec => sec.label === section)) {
-            currentSection = sections.find(sec => sec.label === section);
+    // Start processing line by line instead of splitting further
+    let processingSection = false;
+    for (const line of lines) {
+        // Check if the line is a section header
+        const sectionHeader = sections.find(sec => sec.label === line.trim());
+        if (sectionHeader) {
+            currentSection = sectionHeader;
+            processingSection = true;
             continue;
         }
 
-        const unitLines = section.split("\n").filter(line => line.trim());
+        if (!processingSection || !currentSection) continue;  // Skip lines before a section starts
+
+        const unitLines = line.split("\n").filter(l => l.trim());
         if (unitLines.length) {
             const unitName = unitLines[0].split(" (")[0].trim();
             let enhancement = "";
             let totalModels = 0;
 
             // For characters, don't show model count
-            const isCharacter = currentSection?.is_character;
+            const isCharacter = currentSection.is_character;
             if (isCharacter) {
                 totalModels = 1;
             }
 
             // Parse each unit's line
-            for (const line of unitLines.slice(1)) {
-                console.log("Processing line: ", line);  // Log each line being processed
+            for (const unitLine of unitLines.slice(1)) {
+                console.log("Processing line: ", unitLine);  // Log each line being processed
 
-                if (line.includes("Enhancement:")) {
-                    enhancement = line.split("Enhancement:")[1].trim();
+                if (unitLine.includes("Enhancement:")) {
+                    enhancement = unitLine.split("Enhancement:")[1].trim();
                 }
 
-                const match = line.match(/(\d+)x/);
+                const match = unitLine.match(/(\d+)x/);
                 if (match) {
-                    console.log("Matched a model line:", line);
-                    const isExcluded = isExcludedWeapon(line);  // Call the function and check for exclusions
+                    console.log("Matched a model line:", unitLine);
+                    const isExcluded = isExcludedWeapon(unitLine);  // Call the function and check for exclusions
                     console.log("Is this line excluded?", isExcluded);
                     if (!isCharacter && !isExcluded) {
                         totalModels += parseInt(match[1]);
