@@ -21,8 +21,10 @@ function parseList() {
         return;
     }
 
-    const output = parseArmyList(input);
-    console.log("Output generated:", output);  // Check if the parsing works
+    let output = parseArmyList(input);
+    console.log("Output generated before post-processing:", output);  // Check if the parsing works
+
+    output = postProcessOutput(output);  // Post-process the output
 
     document.getElementById("output").textContent = output;  // Display the output in the <pre> element
 }
@@ -40,15 +42,19 @@ function parseArmyList(inputText) {
         { name: "Allied Units", label: "ALLIED UNITS", is_character: false }
     ];
 
-    // Split the input lines and remove unnecessary metadata like "Exported with App Version"
-    const lines = inputText.split("\n").filter(line => line.trim() && !line.startsWith("Exported with App Version"));
+    const lines = inputText.split("\n").filter(line => line.trim());
 
-    // Remove duplicate army name and faction information
-    const armyName = lines[0].trim();
+    if (!lines[0] || typeof lines[0] !== "string") {
+        console.error("Invalid army name. Check the input format.");
+        return "Error: Invalid army name. Please check the input format.";
+    }
+
+    let armyName = lines[0].trim();
     let pointsInfo = "";
 
     if (armyName.includes("(") && armyName.includes(")")) {
         pointsInfo = armyName.slice(armyName.indexOf("("), armyName.indexOf(")") + 1);
+        armyName = armyName.slice(0, armyName.indexOf("(")).trim();
     }
 
     const factionInfo = `${lines[1]?.trim() || ""} - ${lines[2]?.trim() || ""} - ${lines[4]?.trim() || ""}`;
@@ -57,7 +63,7 @@ function parseArmyList(inputText) {
     output.push(`${armyName} ${pointsInfo}`);
     output.push(factionInfo);
 
-    console.log("Initial output: ", output);
+    console.log("Initial output:", output);
 
     let currentSection = null;
     const splitSections = inputText.split("\n\n");
@@ -74,7 +80,6 @@ function parseArmyList(inputText) {
             let enhancement = "";
             let totalModels = 0;
 
-            // For characters, don't show model count
             const isCharacter = currentSection?.is_character;
             if (isCharacter) {
                 totalModels = 1;
@@ -99,7 +104,6 @@ function parseArmyList(inputText) {
                 }
             }
 
-            // Only display model count for non-characters
             const finalUnitName = enhancement ? `${unitName} w/ ${enhancement}` : unitName;
             if (isCharacter) {
                 output.push(finalUnitName);  // For characters, do not show model count
@@ -122,4 +126,30 @@ function isExcludedWeapon(line) {
         const regex = new RegExp(`\\b${lowerCaseWeapon}\\b`);  // Use word boundary to ensure full word match
         return regex.test(lowerCaseLine);  // Test for full word match
     });
+}
+
+// Post-process the final output to remove the last line, any repeated headers, and duplicate army names/factions
+function postProcessOutput(output) {
+    const outputLines = output.split("\n").filter(line => line.trim());
+    
+    // Remove headers like "CHARACTERS", "BATTLELINE", etc.
+    const headers = ["CHARACTERS", "BATTLELINE", "DEDICATED TRANSPORTS", "OTHER DATASHEETS", "ALLIED UNITS"];
+    let filteredLines = outputLines.filter(line => !headers.includes(line.trim()));
+
+    // Remove the last line, which is typically the "Exported with App Version" line
+    filteredLines.pop();
+
+    // Remove any duplicate army name or faction from the list
+    const firstLine = filteredLines[0];
+    const factionLine = filteredLines[1];
+
+    // Filter out any occurrences of the first line (army name) or the second line (faction)
+    filteredLines = filteredLines.filter((line, index) => {
+        if (index > 1 && (line === firstLine || line === factionLine)) {
+            return false;  // Skip duplicates of the army name and faction
+        }
+        return true;
+    });
+
+    return filteredLines.join("\n");
 }
