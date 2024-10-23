@@ -1,24 +1,52 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Warhammer 40k Army List Parser</title>
-    <link rel="stylesheet" href="css/style.css">
-</head>
-<body>
+function parseList() {
+    let input = document.getElementById('armyList').value;
 
-<div class="container">
-    <h1>Warhammer 40k Army List Parser</h1>
-    <p>Paste your army list below:</p>
-    <textarea id="armyList" placeholder="Paste your Warhammer 40k army list here..."></textarea>
-    <button onclick="parseList()">Simplify List</button>
+    // Create an object to store the parsed sections
+    let parsedList = {
+        "Army Name": "",
+        "Faction": "",
+        "Characters": "",
+        "Battleline": "",
+        "Dedicated Transport": "",
+        "Other": "",
+        "Allies": ""
+    };
 
-    <h2>Parsed List:</h2>
-    <div id="output"></div>
-</div>
+    // Use regex to extract the Army Name and Faction
+    const armyNameMatch = input.match(/Army Name:\s*(.*)/);
+    const factionMatch = input.match(/Faction:\s*(.*)/);
 
-<script src="js/script.js"></script>
+    if (armyNameMatch) parsedList["Army Name"] = armyNameMatch[1];
+    if (factionMatch) parsedList["Faction"] = factionMatch[1];
 
-</body>
-</html>
+    // Define the sections to parse
+    const sections = ["Characters", "Battleline", "Dedicated Transport", "Other", "Allies"];
+
+    // Loop through each section and extract relevant entries
+    sections.forEach(section => {
+        const regex = new RegExp(`${section}:([\\s\\S]*?)(?=\\n\\n|\\n${sections.join('|')}:|$)`, 'gi');
+        const sectionMatch = regex.exec(input);
+
+        if (sectionMatch && sectionMatch[1]) {
+            // Clean up the section by removing points and equipment using regex
+            let cleanSection = sectionMatch[1]
+                .replace(/\(\d+ points\)/g, '') // Remove points like "(100 points)"
+                .replace(/,?\s*with.*$/gm, '')  // Remove equipment starting with "with..."
+                .trim();
+
+            parsedList[section] = cleanSection;
+        }
+    });
+
+    // Format the parsed result into readable output
+    let output = `Army Name: ${parsedList["Army Name"]}\nFaction: ${parsedList["Faction"]}\n\n`;
+
+    sections.forEach(section => {
+        if (parsedList[section].trim()) {
+            output += `${section}:\n${parsedList[section]}\n\n`;
+        }
+    });
+
+    // Display the parsed and cleaned up army list
+    document.getElementById('output').textContent = output.trim();
+}
